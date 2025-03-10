@@ -65,7 +65,6 @@ public class BibliotecaDatabase extends SQLiteOpenHelper {
 		db.insert(TABLE_USUARIOS, null, values);
 		db.close();
 	}
-
 	// Método para obter um usuário pelo nome
 	public Usuario getUsuario(String nome) {
 		SQLiteDatabase db = this.getReadableDatabase();
@@ -85,6 +84,13 @@ public class BibliotecaDatabase extends SQLiteOpenHelper {
 			return usuario;
 		}
 		return null;
+
+	}
+	// Método para excluir um usuário pelo nome
+	public void excluirUsuario(String nome) {
+		SQLiteDatabase db = this.getWritableDatabase();
+		db.delete(TABLE_USUARIOS, COLUMN_NOME + " = ?", new String[]{nome});
+		db.close();
 	}
 	// Método para adicionar um livro
 	public void inserirLivro(Livro livro) {
@@ -117,6 +123,12 @@ public class BibliotecaDatabase extends SQLiteOpenHelper {
 		cursor.close();
 		db.close();
 		return livros;
+	}
+	// Método para excluir um livro pelo título
+	public void excluirLivro(String titulo) {
+		SQLiteDatabase db = this.getWritableDatabase();
+		db.delete(TABLE_LIVROS, COLUMN_TITULO + " = ?", new String[]{titulo});
+		db.close();
 	}
 
 	// Método para verificar se um usuário é administrador
