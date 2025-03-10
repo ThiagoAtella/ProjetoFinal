@@ -35,6 +35,26 @@ public class MainActivity extends AppCompatActivity {
         Livro livro = new Livro("Senhor dos anéis", "1a2b3c4d5e");
         livro.selecionar();
 
+        BibliotecaDatabase db = new BibliotecaDatabase(getApplicationContext());
+
+        // Criando um novo usuário
+        Usuario novoUsuario = new Usuario("joao", "Senha123", "adm");
+        db.inserirUsuario(novoUsuario);
+
+        // Verificando se um usuário é admin
+        if (db.isAdmin("joao")) {
+            System.out.println("Usuário é administrador!");
+        } else {
+        System.out.println("Usuário não é administrador.");
+        }
+
+        // Buscando um usuário pelo nome
+        Usuario usuarioBuscado = db.getUsuario("joao");
+        if (usuarioBuscado != null) {
+            System.out.println("Usuário encontrado: " + usuarioBuscado.getNome());
+        } else {
+            System.out.println("Usuário não encontrado.");
+        }
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
