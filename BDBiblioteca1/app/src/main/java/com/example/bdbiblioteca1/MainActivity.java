@@ -1,32 +1,63 @@
 package com.example.bdbiblioteca1;
 
+package com.example.bdbiblioteca1;
+
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
-
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 import com.example.bdbiblioteca1.model.Livro;
 import com.example.bdbiblioteca1.model.Usuario;
-import com.example.bdbiblioteca1.utils.PasswordUtils;
 
 public class MainActivity extends AppCompatActivity {
+
+    private EditText etUsername;
+    private EditText etPassword;
+    private Button btnLogin;
+    private TextView tvForgotPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        String senhaSegura = PasswordUtils.generateSecurePassword("MinhaSenhaForte123");
-        System.out.println("Senha armazenada: " + senhaSegura);
-        boolean valida = PasswordUtils.verifyPassword("MinhaSenhaForte123", senhaSegura);
-        System.out.println("Senha correta? " + valida);
+        etUsername = findViewById(R.id.etUsername);
+        etPassword = findViewById(R.id.etPassword);
+        btnLogin = findViewById(R.id.btnLogin);
+        tvForgotPassword = findViewById(R.id.tvForgotPassword);
 
-        Usuario usuario = new Usuario("João", "Senha123", "adm");
+        Usuario cliente = new Usuario("Joaquim", "15", "Gerente");
+        Usuario gerente = new Usuario("Paulo", "35", "Cliente");
 
-        // Tenta trocar a senha
-        usuario.trocarSenha("NovaSenha123");
+        Livro livro = new Livro("Senhor dos anéis", "1a2b3c4d5e");
+        livro.selecionar();
 
-        // Verifica se a senha informada está correta
-        System.out.println(usuario.verificarSenha("NovaSenha123")); // true
-        System.out.println(usuario.verificarSenha("Senha123"));     // false
+        btnLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String username = etUsername.getText().toString();
+                String password = etPassword.getText().toString();
+
+                if (username.isEmpty() || password.isEmpty()) {
+                    Toast.makeText(MainActivity.this, "Por favor, preencha todos os campos", Toast.LENGTH_SHORT).show();
+                } else {
+                    if (username.equals("Joaquim") && password.equals("15")) {
+                        Toast.makeText(MainActivity.this, "Login bem-sucedido", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(MainActivity.this, "Usuário ou senha incorretos", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        });
+
+        tvForgotPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, "Função de redefinir senha ainda não implementada", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
