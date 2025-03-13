@@ -5,16 +5,16 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
 import com.example.bdbiblioteca1.model.Livro;
 import com.example.bdbiblioteca1.model.Usuario;
-
+import com.example.bdbiblioteca1.utils.PasswordUtils;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BibliotecaDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "biblioteca.bd";
 	private static final int DATABASE_VERSION = 1;
+
 	// Tabela Livros
 	private static final String TABLE_LIVROS = "livros";
 	private static final String COLUMN_ID = "id";
@@ -33,12 +33,11 @@ public class BibliotecaDatabase extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		// Criando a tabela de livros
 		String CREATE_TABLE_LIVROS = "CREATE TABLE " + TABLE_LIVROS + "("
 				+ COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
 				+ COLUMN_GENERO + " TEXT, "
 				+ COLUMN_TITULO + " TEXT)";
-		// Criando a tabela de usuários
+
 		String CREATE_TABLE_USUARIOS = "CREATE TABLE " + TABLE_USUARIOS + "("
 				+ COLUMN_NOME + " TEXT PRIMARY KEY, "
 				+ COLUMN_SENHA + " TEXT, "
@@ -54,18 +53,20 @@ public class BibliotecaDatabase extends SQLiteOpenHelper {
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_USUARIOS);
 		onCreate(db);
 	}
-	// Método para adicionar um usuário
+
+	// Inserir usuário
 	public void inserirUsuario(Usuario usuario) {
 		SQLiteDatabase db = this.getWritableDatabase();
 		ContentValues values = new ContentValues();
 		values.put(COLUMN_NOME, usuario.getNome());
-		values.put(COLUMN_SENHA, usuario.getSenha());  // Atenção: Senha não está criptografada!
+		values.put(COLUMN_SENHA, PasswordUtils.generateSecurePassword(usuario.getSenha())); // Agora criptografa a senha!
 		values.put(COLUMN_NIVEL, usuario.getNivel());
 
 		db.insert(TABLE_USUARIOS, null, values);
 		db.close();
 	}
-	// Método para obter um usuário pelo nome
+
+	// Buscar usuário pelo nome
 	public Usuario getUsuario(String nome) {
 		SQLiteDatabase db = this.getReadableDatabase();
 		Cursor cursor = db.query(TABLE_USUARIOS,
@@ -84,54 +85,15 @@ public class BibliotecaDatabase extends SQLiteOpenHelper {
 			return usuario;
 		}
 		return null;
-
-	}
-	// Método para excluir um usuário pelo nome
-	public void excluirUsuario(String nome) {
-		SQLiteDatabase db = this.getWritableDatabase();
-		db.delete(TABLE_USUARIOS, COLUMN_NOME + " = ?", new String[]{nome});
-		db.close();
-	}
-	// Método para adicionar um livro
-	public void inserirLivro(Livro livro) {
-		SQLiteDatabase db = this.getWritableDatabase();
-		ContentValues values = new ContentValues();
-		values.put(COLUMN_GENERO, livro.getGenero());
-		values.put(COLUMN_TITULO, livro.getTitulo());
-
-		db.insert(TABLE_LIVROS, null, values);
-		db.close();
 	}
 
-	// Método para selecionar um livro
-	public List<Livro> getTodosLivros() {
-		List<Livro> livros = new ArrayList<>();
-		SQLiteDatabase db = this.getReadableDatabase();
-		String SELECT_ALL = "SELECT * FROM " + TABLE_LIVROS;
-		Cursor cursor = db.rawQuery(SELECT_ALL, null);
-
-		if (cursor.moveToFirst()) {
-			do {
-				Livro livro = new Livro(
-						cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_GENERO)),
-						cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITULO))
-				);
-				livros.add(livro);
-			} while (cursor.moveToNext());
-		}
-
-		cursor.close();
-		db.close();
-		return livros;
-	}
-	// Método para excluir um livro pelo título
-	public void excluirLivro(String titulo) {
-		SQLiteDatabase db = this.getWritableDatabase();
-		db.delete(TABLE_LIVROS, COLUMN_TITULO + " = ?", new String[]{titulo});
-		db.close();
+	// Autenticar usuário
+	public boolean autenticarUsuario(String nome, String senhaDigitada) {
+		Usuario usuario = getUsuario(nome);
+		return usuario != null && PasswordUtils.verifyPassword(senhaDigitada, usuario.getSenha());
 	}
 
-	// Método para verificar se um usuário é administrador
+	// Verificar se é administrador
 	public boolean isAdmin(String nome) {
 		Usuario usuario = getUsuario(nome);
 		return usuario != null && "adm".equals(usuario.getNivel());

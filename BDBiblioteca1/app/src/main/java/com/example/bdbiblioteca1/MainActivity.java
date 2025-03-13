@@ -1,7 +1,5 @@
 package com.example.bdbiblioteca1;
 
-package com.example.bdbiblioteca1;
-
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -9,7 +7,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.example.bdbiblioteca1.model.Livro;
+import com.example.bdbiblioteca1.database.BibliotecaDatabase;
 import com.example.bdbiblioteca1.model.Usuario;
 
 public class MainActivity extends AppCompatActivity {
@@ -18,6 +16,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText etPassword;
     private Button btnLogin;
     private TextView tvForgotPassword;
+    private BibliotecaDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,55 +28,33 @@ public class MainActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btnLogin);
         tvForgotPassword = findViewById(R.id.tvForgotPassword);
 
-        Usuario cliente = new Usuario("Joaquim", "15", "Gerente");
-        Usuario gerente = new Usuario("Paulo", "35", "Cliente");
+        db = new BibliotecaDatabase(this);
 
-        Livro livro = new Livro("Senhor dos anéis", "1a2b3c4d5e");
-        livro.selecionar();
+        // Criando um usuário admin padrão (apenas para teste)
+        Usuario admin = new Usuario("admin", "Senha123", "adm");
+        db.inserirUsuario(admin);
 
-        BibliotecaDatabase db = new BibliotecaDatabase(getApplicationContext());
+        // Evento de clique no botão de login
+        btnLogin.setOnClickListener(v -> {
+            String username = etUsername.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
 
-        // Criando um novo usuário
-        Usuario novoUsuario = new Usuario("joao", "Senha123", "adm");
-        db.inserirUsuario(novoUsuario);
+            if (username.isEmpty() || password.isEmpty()) {
+                Toast.makeText(MainActivity.this, "Por favor, preencha todos os campos", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-        // Verificando se um usuário é admin
-        if (db.isAdmin("joao")) {
-            System.out.println("Usuário é administrador!");
-        } else {
-        System.out.println("Usuário não é administrador.");
-        }
-
-        // Buscando um usuário pelo nome
-        Usuario usuarioBuscado = db.getUsuario("joao");
-        if (usuarioBuscado != null) {
-            System.out.println("Usuário encontrado: " + usuarioBuscado.getNome());
-        } else {
-            System.out.println("Usuário não encontrado.");
-        }
-        btnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String username = etUsername.getText().toString();
-                String password = etPassword.getText().toString();
-
-                if (username.isEmpty() || password.isEmpty()) {
-                    Toast.makeText(MainActivity.this, "Por favor, preencha todos os campos", Toast.LENGTH_SHORT).show();
-                } else {
-                    if (username.equals("Joaquim") && password.equals("15")) {
-                        Toast.makeText(MainActivity.this, "Login bem-sucedido", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(MainActivity.this, "Usuário ou senha incorretos", Toast.LENGTH_SHORT).show();
-                    }
-                }
+            if (db.autenticarUsuario(username, password)) {
+                Toast.makeText(MainActivity.this, "Login bem-sucedido!", Toast.LENGTH_SHORT).show();
+                // Aqui você pode redirecionar para outra activity caso necessário
+            } else {
+                Toast.makeText(MainActivity.this, "Usuário ou senha incorretos!", Toast.LENGTH_SHORT).show();
             }
         });
 
-        tvForgotPassword.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Função de redefinir senha ainda não implementada", Toast.LENGTH_SHORT).show();
-            }
-        });
+        // Evento de clique no texto "Esqueceu sua senha?"
+        tvForgotPassword.setOnClickListener(v ->
+                Toast.makeText(MainActivity.this, "Função de redefinir senha ainda não implementada", Toast.LENGTH_SHORT).show()
+        );
     }
 }

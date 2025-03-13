@@ -1,6 +1,6 @@
 package com.example.bdbiblioteca1.utils;
-import android.os.Build;
 
+import android.os.Build;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.SecureRandom;
@@ -9,47 +9,40 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 public class PasswordUtils {
-
 	private static final int ITERATIONS = 10000;
 	private static final int KEY_LENGTH = 256;
 	private static final String ALGORITHM = "PBKDF2WithHmacSHA256";
-	// Gerar salt aleatório
+
 	private static String generateSalt() {
 		SecureRandom random = new SecureRandom();
 		byte[] salt = new byte[16];
 		random.nextBytes(salt);
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			return Base64.getEncoder().encodeToString(salt);
-		}
-		return "";
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+				? Base64.getEncoder().encodeToString(salt)
+				: android.util.Base64.encodeToString(salt, android.util.Base64.NO_WRAP);
 	}
-	// Gerar hash da senha usando PBKDF2
+
 	public static String hashPassword(String password, String salt) {
 		try {
-			PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(),
-					ITERATIONS, KEY_LENGTH);
+			PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(), ITERATIONS, KEY_LENGTH);
 			SecretKeyFactory factory = SecretKeyFactory.getInstance(ALGORITHM);
 			byte[] hash = factory.generateSecret(spec).getEncoded();
-
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-				return Base64.getEncoder().encodeToString(hash);
-			}
+			return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+					? Base64.getEncoder().encodeToString(hash)
+					: android.util.Base64.encodeToString(hash, android.util.Base64.NO_WRAP);
 		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
 			throw new RuntimeException("Erro ao gerar hash da senha", e);
 		}
-		return password;
 	}
+
 	public static String generateSecurePassword(String password) {
 		String salt = generateSalt();
 		String hashedPassword = hashPassword(password, salt);
-		return salt + ":" + hashedPassword; // Salvar salt e hash juntos
+		return salt + ":" + hashedPassword;
 	}
-	// Verificar senha
+
 	public static boolean verifyPassword(String inputPassword, String storedPassword) {
 		String[] parts = storedPassword.split(":");
-		if (parts.length != 2) return false;
-		String salt = parts[0];
-		String hashOfInput = hashPassword(inputPassword, salt);
-		return hashOfInput.equals(parts[1]);
+		return parts.length == 2 && hashPassword(inputPassword, parts[0]).equals(parts[1]);
 	}
 }
