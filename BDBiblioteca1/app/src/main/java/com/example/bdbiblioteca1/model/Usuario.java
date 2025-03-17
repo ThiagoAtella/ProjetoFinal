@@ -1,6 +1,5 @@
 package com.example.bdbiblioteca1.model;
 
-import com.example.bdbiblioteca1.utils.PasswordUtils;
 import java.util.regex.Pattern;
 
 public class Usuario {
@@ -12,7 +11,7 @@ public class Usuario {
 
     public Usuario(String nome, String senha, String nivel) {
         this.nome = nome;
-        this.senha = PasswordUtils.generateSecurePassword(senha); // Agora criptografa a senha automaticamente!
+        this.senha = senha; // Senha não será criptografada aqui, pois já é criptografada no banco.
         this.nivel = nivel;
     }
 
@@ -30,10 +29,10 @@ public class Usuario {
 
     public void trocarSenha(String novaSenha) {
         if (novaSenha != null && PATTERN.matcher(novaSenha).matches()) {
-            this.senha = PasswordUtils.generateSecurePassword(novaSenha);
+            this.senha = novaSenha; // A criptografia acontece na inserção no banco
             System.out.println("Senha alterada com sucesso!");
         } else {
-            System.out.println("Senha inválida!");
+            System.out.println("Senha inválida! Deve conter pelo menos 8 caracteres, incluindo letras maiúsculas, minúsculas e números.");
         }
     }
 }

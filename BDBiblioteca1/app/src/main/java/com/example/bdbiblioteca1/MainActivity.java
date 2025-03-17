@@ -30,9 +30,11 @@ public class MainActivity extends AppCompatActivity {
 
         db = new BibliotecaDatabase(this);
 
-        // Criando um usuário admin padrão (apenas para teste)
-        Usuario admin = new Usuario("admin", "Senha123", "adm");
-        db.inserirUsuario(admin);
+        // Criar um usuário admin apenas se ele não existir
+        if (db.getUsuario("admin") == null) {
+            Usuario admin = new Usuario("admin", "Senha123", "adm");
+            db.inserirUsuario(admin);
+        }
 
         // Evento de clique no botão de login
         btnLogin.setOnClickListener(v -> {

@@ -17,9 +17,7 @@ public class PasswordUtils {
 		SecureRandom random = new SecureRandom();
 		byte[] salt = new byte[16];
 		random.nextBytes(salt);
-		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-				? Base64.getEncoder().encodeToString(salt)
-				: android.util.Base64.encodeToString(salt, android.util.Base64.NO_WRAP);
+		return Base64.getEncoder().encodeToString(salt);
 	}
 
 	public static String hashPassword(String password, String salt) {
@@ -27,9 +25,7 @@ public class PasswordUtils {
 			PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(), ITERATIONS, KEY_LENGTH);
 			SecretKeyFactory factory = SecretKeyFactory.getInstance(ALGORITHM);
 			byte[] hash = factory.generateSecret(spec).getEncoded();
-			return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-					? Base64.getEncoder().encodeToString(hash)
-					: android.util.Base64.encodeToString(hash, android.util.Base64.NO_WRAP);
+			return Base64.getEncoder().encodeToString(hash);
 		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
 			throw new RuntimeException("Erro ao gerar hash da senha", e);
 		}
@@ -42,7 +38,10 @@ public class PasswordUtils {
 	}
 
 	public static boolean verifyPassword(String inputPassword, String storedPassword) {
+		if (storedPassword == null || !storedPassword.contains(":")) return false;
 		String[] parts = storedPassword.split(":");
-		return parts.length == 2 && hashPassword(inputPassword, parts[0]).equals(parts[1]);
+		String salt = parts[0];
+		String hash = parts[1];
+		return hash.equals(hashPassword(inputPassword, salt));
 	}
 }

@@ -3,11 +3,11 @@ package com.example.bdbiblioteca1.model;
 public class Livro {
 	private String titulo;
 	private int cod;
-	private String  genero;
+	private String genero;
 
-	public Livro(String titulo, String cod) {
+	public Livro(String titulo, int cod, String genero) {
 		this.titulo = titulo;
-		this.cod = Integer.parseInt(cod);
+		this.cod = cod;
 		this.genero = genero;
 	}
 
@@ -23,8 +23,8 @@ public class Livro {
 		return cod;
 	}
 
-	public void setCod(String cod) {
-		this.cod = Integer.parseInt(cod);
+	public void setCod(int cod) {
+		this.cod = cod;
 	}
 
 	public String getGenero() {
@@ -35,7 +35,7 @@ public class Livro {
 		this.genero = genero;
 	}
 
-	public void selecionar(){
-		System.out.println("Brasil");
+	public void selecionar() {
+		System.out.println("Livro selecionado: " + titulo);
 	}
 }
